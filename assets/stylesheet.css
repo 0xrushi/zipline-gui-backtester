@@ -1,0 +1,39 @@
+.banner {
+    height: 75px;
+    margin: 0px -10px 10px;
+    background-color: rgb(66, 196, 247);
+    border-radius: 2px;
+}
+
+.banner h2{
+    color: white;
+    padding-top: 10px;
+    margin-left: 2%;
+    display: inline-block;
+}
+
+.banner Img{
+    position: relative;
+    float: right;
+    right: 10px;
+    height: 75px;
+}
+
+#example-form{
+    width: 40%;
+    margin-right: auto;
+    margin-left: auto;
+    text-align: center;
+    /* background: red; */
+}
+
+
+#example-form button{
+    display: inline-flex;
+    height: 100%;
+    border: none;
+    padding: 14px 28px;
+    font-size: 16px;
+    cursor: pointer;
+    text-align: center;
+}
