@@ -14,17 +14,33 @@ import os
 import dash_table
 import base64
 import io
+import pandas as pd
 
 from tabs.tab1 import tab_1_layout
 from tabs.tab2 import tab_2_layout
+
+import numpy as np
+import pandas as pd
+import zipline
+from yahoofinancials import YahooFinancials
+import warnings
+import pandas_datareader as pdr
+from zipline.api import order, record, symbol, set_benchmark
+import zipline
+import pytz
+from scripts.get_from_pdr_to_panel import get_from_pdr_to_panel
+from zipline.api import order, record, symbol, set_benchmark
+import zipline
+from datetime import datetime
+import pytz
 
 UPLOAD_DIRECTORY = "uploads"
 if not os.path.exists(UPLOAD_DIRECTORY):
     os.makedirs(UPLOAD_DIRECTORY)
 
 
-start = datetime.datetime.today() - relativedelta(years=5)
-end = datetime.datetime.today()
+start = datetime.today() - relativedelta(years=5)
+end = datetime.today()
 
 
 app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
@@ -77,18 +93,55 @@ def tab_resources(click):
 )
 def update_fig(n_clicks, input_value):
     if n_clicks is not None:
-        # df = get_historical_data(input_value, start=start, end=end, output_format="pandas")
-        #df = pd.read_csv("aapl.csv")
-        #df = pd.read_csv(input_value)
-        df = pd.read_json(input_value, orient='split')
+        #df = pd.read_json(input_value, orient='split')
+        #print(df)
+        panel = get_from_pdr_to_panel() #nvidia
+        
 
-        print(df)
+        def initialize(context):
+            pass
 
-        trace_line = go.Scatter(x=list(df.date),
-                                y=list(df.close),
-                                # visible=False,
-                                name="Close",
-                                showlegend=False)
+
+        def handle_data(context, data):
+            todays_pr= data.current(symbol('NVDA'),'price')
+            diff= context.portfolio.cash - todays_pr 
+
+            hist = data.history(symbol('NVDA'),'price', 35, '1d')
+            sma_35= hist.mean()
+            sma_5= hist[-5:].mean()
+            #print(hist)
+            record(sma_35=sma_35)
+            record(sma_5=sma_5)
+            record(NVDA=todays_pr)
+
+            if diff>0:
+                # Trading logic
+                if sma_5 > sma_35:
+                    # order_target orders as many shares as needed to
+                    # achieve the desired number of shares.
+                    order(symbol("NVDA"), 2)
+                elif sma_5 < sma_35:
+                    order(symbol("NVDA"), -2)
+                    
+            
+        perf = zipline.run_algorithm(start=datetime(2016, 2, 24, 0, 0, 0, 0, pytz.utc),
+                            end=datetime(2017, 12, 29, 0, 0, 0, 0, pytz.utc),
+                            initialize=initialize,
+                            capital_base=100,
+                            handle_data=handle_data,
+                            data=panel)
+
+        # trace_line = go.Scatter(x=list(df.date),
+        #                         y=list(df.close),
+        #                         # visible=False,
+        #                         name="Close",
+        #                         showlegend=False)
+
+        trace_line= go.Figure()
+        trace_line.add_scatter(x=perf.index, y=perf.sma_35,mode='lines', name="sma_35")
+        trace_line.add_scatter(x=perf.index, y=perf.sma_5,mode='lines', name="sma_5")
+        trace_line.add_scatter(x=perf.index, y=perf.NVDA,mode='lines', name="NVDA")
+
 
         trace_candle = go.Candlestick(x=df.date,
                                       open=df.open,
