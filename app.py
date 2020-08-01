@@ -11,42 +11,24 @@ import datetime
 import pandas as pd
 import requests
 import os
+import dash_table
+import base64
+import io
+
+from tabs.tab1 import tab_1_layout
+from tabs.tab2 import tab_2_layout
 
 UPLOAD_DIRECTORY = "uploads"
 if not os.path.exists(UPLOAD_DIRECTORY):
     os.makedirs(UPLOAD_DIRECTORY)
 
+
 start = datetime.datetime.today() - relativedelta(years=5)
 end = datetime.datetime.today()
 
-# def update_news():
-#     url = "https://api.iextrading.com/1.0/stock/`market`/news/last/5"
-#     r = requests.get(url)
-#     json_string = r.json()
-
-#     df = pd.DataFrame(json_string)
-#     df = pd.DataFrame(df[["headline", "url"]])
-#     return df
-
-
-def generate_html_table(max_rows=10):
-
-    # df = update_news()
-
-    return html.Div(
-        [
-            html.Div(
-                html.Table(
-                    # Header
-                    [html.Tr([html.Th()])]
-                ),
-                style={"height": "300px", "overflowY": "scroll"},
-            ),
-        ],
-        style={"height": "100%"},)
-
 
 app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
+app.config['suppress_callback_exceptions'] = False
 
 app.layout = html.Div([
     html.Div([
@@ -55,17 +37,14 @@ app.layout = html.Div([
     ], className="banner"),
 
     html.Div([
-        dcc.Input(id="stock-input", value="SPY", type="text"),
-        html.Button(id="submit-button", n_clicks=0, children="Submit")
+        dbc.Tabs(id='tabs', children=[
+            dbc.Tab(tab_1_layout, tab_id='tab1id', label='Tab one'),
+            dbc.Tab(tab_2_layout, tab_id='tab2id', label='Tab two'),
+        ], active_tab="tab1id"),
+        html.Div(id='tab-content')
     ]),
 
-    html.Div([
-        dcc.Tabs(id='tabs-example', value='tab-1', children=[
-            dcc.Tab(label='Tab one', value='tab-1'),
-            dcc.Tab(label='Tab two', value='tab-2'),
-        ]),
-        html.Div(id='tabs-example-content')
-    ]),
+    html.Div(id='intermediate-value', children=['<p>intermediate</p>'])
 ])
 
 # app.css.append_css({
@@ -73,147 +52,163 @@ app.layout = html.Div([
 # })
 
 
-@app.callback(Output('tabs-example-content', 'children'),
-              [Input('tabs-example', 'value')])
-def render_content(tab):
-    if tab == 'tab-1':
-        datepicker_input = dbc.FormGroup(
-            [dbc.Button("Select Date Range", color="primary", className="mr-1"),
-                dcc.DatePickerRange(
-                end_date=dt(2017, 6, 21, 23, 59, 59, 999999),
-                display_format='MMM Do, YY',
-                start_date_placeholder_text='MMM Do, YY'
-            )])
-        fileupload_input = dbc.FormGroup(
-            [dcc.Upload([
-                'Drag and Drop or ',
-                html.A('Select a File')
-            ], style={
-                'width': '100%',
-                'height': '60px',
-                'lineHeight': '60px',
-                'borderWidth': '1px',
-                'borderStyle': 'dashed',
-                'borderRadius': '5px',
-                'textAlign': 'center'
-            })]
-        )
-
-        form = dbc.Form([datepicker_input, fileupload_input],
-                        id="example-form")
-
-        return html.Div([
-            html.H3('Tab content 2'),
-            form])
-    elif tab == 'tab-2':
-        return html.Div([
-            dcc.Graph(
-                id="graph_close",
-            )
-        ], className="six columns")
+@app.callback(
+    # Button: switch to Tab 2
+    Output("tabs", "active_tab"),
+    [Input("tab1_btn_submit", "n_clicks")]
+)
+def tab_resources(click):
+    if click:
+        return "tab2id"
+    else:
+        return "tab1id"
 
 
-@ app.callback(Output('graph_close', 'figure'),
-               [Input("submit-button", "n_clicks")],
-               [State("stock-input", "value")]
-               )
+# @app.callback(
+#     Output('graph_close', 'figure'),
+#     [Input("tab1_btn_submit", "n_clicks")],
+#     # [State('intermediate-value', 'children')]
+# )
+@app.callback(
+    Output('graph_close', 'figure'),
+    # Button: switch to Tab 2
+    [Input("tabs", "active_tab")],
+    [State("intermediate-value", "children")]
+)
 def update_fig(n_clicks, input_value):
-    # df = get_historical_data(input_value, start=start, end=end, output_format="pandas")
-    df = pd.read_csv("aapl.csv")
-    trace_line = go.Scatter(x=list(df.date),
-                            y=list(df.close),
-                            # visible=False,
-                            name="Close",
+    if n_clicks is not None:
+        # df = get_historical_data(input_value, start=start, end=end, output_format="pandas")
+        #df = pd.read_csv("aapl.csv")
+        #df = pd.read_csv(input_value)
+        df = pd.read_json(input_value, orient='split')
+
+        print(df)
+
+        trace_line = go.Scatter(x=list(df.date),
+                                y=list(df.close),
+                                # visible=False,
+                                name="Close",
+                                showlegend=False)
+
+        trace_candle = go.Candlestick(x=df.date,
+                                      open=df.open,
+                                      high=df.high,
+                                      low=df.low,
+                                      close=df.close,
+                                      # increasing=dict(line=dict(color="#00ff00")),
+                                      # decreasing=dict(line=dict(color="white")),
+                                      visible=False,
+                                      showlegend=False)
+
+        trace_bar = go.Ohlc(x=df.date,
+                            open=df.open,
+                            high=df.high,
+                            low=df.low,
+                            close=df.close,
+                            # increasing=dict(line=dict(color="#888888")),
+                            # decreasing=dict(line=dict(color="#888888")),
+                            visible=False,
                             showlegend=False)
 
-    trace_candle = go.Candlestick(x=df.date,
-                                  open=df.open,
-                                  high=df.high,
-                                  low=df.low,
-                                  close=df.close,
-                                  # increasing=dict(line=dict(color="#00ff00")),
-                                  # decreasing=dict(line=dict(color="white")),
-                                  visible=False,
-                                  showlegend=False)
+        data = [trace_line, trace_candle, trace_bar]
 
-    trace_bar = go.Ohlc(x=df.date,
-                        open=df.open,
-                        high=df.high,
-                        low=df.low,
-                        close=df.close,
-                        # increasing=dict(line=dict(color="#888888")),
-                        # decreasing=dict(line=dict(color="#888888")),
-                        visible=False,
-                        showlegend=False)
-
-    data = [trace_line, trace_candle, trace_bar]
-
-    updatemenus = list([
-        dict(
-            buttons=list([
-                dict(
-                    args=[{'visible': [True, False, False]}],
-                    label='Line',
-                    method='update'
-                ),
-                dict(
-                    args=[{'visible': [False, True, False]}],
-                    label='Candle',
-                    method='update'
-                ),
-                dict(
-                    args=[{'visible': [False, False, True]}],
-                    label='Bar',
-                    method='update'
-                ),
-            ]),
-            direction='down',
-            pad={'r': 10, 't': 10},
-            showactive=True,
-            x=0,
-            xanchor='left',
-            y=1.05,
-            yanchor='top'
-        ),
-    ])
-
-    layout = dict(
-        title=input_value,
-        updatemenus=updatemenus,
-        autosize=False,
-        xaxis=dict(
-            rangeselector=dict(
+        updatemenus = list([
+            dict(
                 buttons=list([
-                    dict(count=1,
-                         label='1m',
-                         step='month',
-                         stepmode='backward'),
-                    dict(count=6,
-                         label='6m',
-                         step='month',
-                         stepmode='backward'),
-                    dict(count=1,
-                         label='YTD',
-                         step='year',
-                         stepmode='todate'),
-                    dict(count=1,
-                         label='1y',
-                         step='year',
-                         stepmode='backward'),
-                    dict(step='all')
-                ])
+                    dict(
+                        args=[{'visible': [True, False, False]}],
+                        label='Line',
+                        method='update'
+                    ),
+                    dict(
+                        args=[{'visible': [False, True, False]}],
+                        label='Candle',
+                        method='update'
+                    ),
+                    dict(
+                        args=[{'visible': [False, False, True]}],
+                        label='Bar',
+                        method='update'
+                    ),
+                ]),
+                direction='down',
+                pad={'r': 10, 't': 10},
+                showactive=True,
+                x=0,
+                xanchor='left',
+                y=1.05,
+                yanchor='top'
             ),
-            rangeslider=dict(
-                visible=True
-            ),
-            type='date'
-        )
-    )
+        ])
 
-    return {
-        "data": data,
-        "layout": layout
-    }
+        layout = dict(
+            title="hello",
+            updatemenus=updatemenus,
+            autosize=False,
+            xaxis=dict(
+                rangeselector=dict(
+                    buttons=list([
+                        dict(count=1,
+                             label='1m',
+                             step='month',
+                             stepmode='backward'),
+                        dict(count=6,
+                             label='6m',
+                             step='month',
+                             stepmode='backward'),
+                        dict(count=1,
+                             label='YTD',
+                             step='year',
+                             stepmode='todate'),
+                        dict(count=1,
+                             label='1y',
+                             step='year',
+                             stepmode='backward'),
+                        dict(step='all')
+                    ])
+                ),
+                rangeslider=dict(
+                    visible=True
+                ),
+                type='date'
+            )
+        )
+
+        return {
+            "data": data,
+            "layout": layout
+        }
+
+
+pre_style = {
+    'whiteSpace': 'pre-wrap',
+    'wordBreak': 'break-all',
+    'whiteSpace': 'normal'
+}
+
+
+# @app.callback(Output('output-data-upload', 'children'),
+@app.callback(Output('intermediate-value', 'children'),
+              [Input('upload-data', 'contents')])
+def update_output(contents):
+    if contents is not None:
+        # print(contents)
+        content_type, content_string = contents.split(',')
+        content_string = base64.b64decode(content_string).decode('utf-8')
+        # print(content_string)
+        if 'csv' in content_type:
+            #df = pd.read_csv(io.StringIO(content_string))
+            cleaned_df = pd.read_csv(io.StringIO(content_string))
+            return cleaned_df.to_json(date_format='iso', orient='split')
+            # return "content_string"
+    return
+
+
+@app.callback(
+    dash.dependencies.Output('dd-output-container', 'children'),
+    [dash.dependencies.Input('demo-dropdown', 'value')])
+def update_output_dd(value):
+    return 'You have selected "{}"'.format(value)
 
 
 if __name__ == "__main__":

@@ -1,4 +1,3 @@
 {
-    "python.pythonPath": "E:\\anaconda3\\envs\\env_zipline\\python.exe",
     "python.formatting.provider": "autopep8"
 }
