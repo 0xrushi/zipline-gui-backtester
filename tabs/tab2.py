@@ -4,6 +4,7 @@ import dash_bootstrap_components as dbc
 import dash_html_components as html
 from dash.dependencies import Input, Output
 from datetime import datetime as dt
+import dash_table
 
 
 tab_2_layout = html.Div(id='tab2-lyt',
@@ -26,7 +27,9 @@ tab_2_layout = html.Div(id='tab2-lyt',
                                     {'label': 'ohc',
                                         'value': '100'}
                                 ],
-                                value='001'
+                                value='001',
+                                searchable=False,
+                                multi=False
                             ),
                             html.Div(id='dd-output-container'),
 
@@ -34,6 +37,8 @@ tab_2_layout = html.Div(id='tab2-lyt',
 
                             dcc.Graph(
                                 id="graph_close",
-                            )
+                            ),
+                            dash_table.DataTable(
+                                id='table')
                         ],
                         className="six columns")

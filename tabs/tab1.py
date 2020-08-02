@@ -13,6 +13,9 @@ datepicker_input = dbc.FormGroup(
         display_format='MMM Do, YY',
         start_date_placeholder_text='MMM Do, YY'
     )])
+
+stock_name_inp = dbc.FormGroup(
+    [dbc.Input(placeholder="TickerName...", type="text")])
 fileupload_input = dbc.FormGroup(
     [dcc.Upload(
         id='upload-data',
@@ -34,7 +37,7 @@ fileupload_input = dbc.FormGroup(
 
 btn = dbc.Button("Submit", color="primary", id="tab1_btn_submit")
 
-form = dbc.Form([datepicker_input, fileupload_input, btn],
+form = dbc.Form([datepicker_input, stock_name_inp, fileupload_input, btn],
                 id="example-form")
 
 
