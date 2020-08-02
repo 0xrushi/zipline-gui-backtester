@@ -6,8 +6,9 @@ from dash.dependencies import Input, Output
 from datetime import datetime as dt
 
 
-tab_2_layout = html.Div(
-    [
+
+tab_2_layout = html.Div(id='tab2-lyt',
+    children=[
         dcc.Dropdown(
             id='demo-dropdown',
             options=[

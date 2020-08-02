@@ -33,6 +33,7 @@ from zipline.api import order, record, symbol, set_benchmark
 import zipline
 from datetime import datetime
 import pytz
+import json
 
 UPLOAD_DIRECTORY = "uploads"
 if not os.path.exists(UPLOAD_DIRECTORY):
@@ -86,14 +87,19 @@ def tab_resources(click):
 #     # [State('intermediate-value', 'children')]
 # )
 @app.callback(
-    Output('graph_close', 'figure'),
+    Output('tab2-lyt', 'children'),
     # Button: switch to Tab 2
     [Input("tabs", "active_tab")],
     [State("intermediate-value", "children")]
 )
 def update_fig(n_clicks, input_value):
     if n_clicks is not None:
-        #df = pd.read_json(input_value, orient='split')
+        #parsed = json.loads(input_value)
+        # df=pd.read_csv(input_value)
+        print(input_value)
+        print(type(input_value))
+        df = pd.read_json(input_value, orient='records')
+        #df=pd.DataFrame(json.loads(str(df)))
         #print(df)
         panel = get_from_pdr_to_panel() #nvidia
         
@@ -130,7 +136,11 @@ def update_fig(n_clicks, input_value):
                             capital_base=100,
                             handle_data=handle_data,
                             data=panel)
+        perf.plots=[go.Scatter(x=perf.index, y=perf.sma_35,mode='lines', name="sma_35"),
+                    go.Scatter(x=perf.index, y=perf.sma_5,mode='lines', name="sma_5")
+        ]
 
+        # print(perf)
         # trace_line = go.Scatter(x=list(df.date),
         #                         y=list(df.close),
         #                         # visible=False,
@@ -138,22 +148,29 @@ def update_fig(n_clicks, input_value):
         #                         showlegend=False)
 
         trace_line= go.Figure()
-        trace_line.add_scatter(x=perf.index, y=perf.sma_35,mode='lines', name="sma_35")
-        trace_line.add_scatter(x=perf.index, y=perf.sma_5,mode='lines', name="sma_5")
         trace_line.add_scatter(x=perf.index, y=perf.NVDA,mode='lines', name="NVDA")
+        for i in perf.plots:
+            trace_line.add_trace(i)
+        return trace_line
 
-
-        trace_candle = go.Candlestick(x=df.date,
+        trace_candle= go.Figure()
+        trace_candle.add_trace(go.Candlestick(x=df.date,
                                       open=df.open,
                                       high=df.high,
                                       low=df.low,
                                       close=df.close,
                                       # increasing=dict(line=dict(color="#00ff00")),
                                       # decreasing=dict(line=dict(color="white")),
-                                      visible=False,
+                                      visible=True,
                                       showlegend=False)
+        )
+        for i in perf.plots:
+            trace_candle.add_trace(i)
 
-        trace_bar = go.Ohlc(x=df.date,
+        # return trace_candle
+
+        trace_bar = go.Figure()
+        trace_bar .add_trace(go.Ohlc(x=df.date,
                             open=df.open,
                             high=df.high,
                             low=df.low,
@@ -161,7 +178,9 @@ def update_fig(n_clicks, input_value):
                             # increasing=dict(line=dict(color="#888888")),
                             # decreasing=dict(line=dict(color="#888888")),
                             visible=False,
-                            showlegend=False)
+                            showlegend=False))
+        for i in perf.plots:
+            trace_bar.add_trace(i)
 
         data = [trace_line, trace_candle, trace_bar]
 
@@ -251,8 +270,8 @@ def update_output(contents):
         # print(content_string)
         if 'csv' in content_type:
             #df = pd.read_csv(io.StringIO(content_string))
-            cleaned_df = pd.read_csv(io.StringIO(content_string))
-            return cleaned_df.to_json(date_format='iso', orient='split')
+            cleaned_df = pd.read_csv(io.StringIO(content_string))            
+            return cleaned_df.to_json(date_format='iso', orient='records')
             # return "content_string"
     return
 
