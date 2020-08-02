@@ -86,182 +86,357 @@ def tab_resources(click):
 #     [Input("tab1_btn_submit", "n_clicks")],
 #     # [State('intermediate-value', 'children')]
 # )
+
+
+# @app.callback(
+#     Output('tab2-lyt', 'children'),
+#     # Button: switch to Tab 2
+#     [Input("tabs", "active_tab")],
+#     [State("intermediate-value", "children")]
+# )
+# def update_fig(n_clicks, input_value):
+#     if n_clicks is not None:
+#         # parsed = json.loads(input_value)
+#         # df=pd.read_csv(input_value)
+#         print(input_value)
+#         print(type(input_value))
+#         df = pd.read_json(input_value, orient='records')
+#         # df=pd.DataFrame(json.loads(str(df)))
+#         # print(df)
+#         panel = get_from_pdr_to_panel()  # nvidia
+
+#         def initialize(context):
+#             pass
+
+#         def handle_data(context, data):
+#             todays_pr = data.current(symbol('NVDA'), 'price')
+#             diff = context.portfolio.cash - todays_pr
+
+#             hist = data.history(symbol('NVDA'), 'price', 35, '1d')
+#             sma_35 = hist.mean()
+#             sma_5 = hist[-5:].mean()
+#             # print(hist)
+#             record(sma_35=sma_35)
+#             record(sma_5=sma_5)
+#             record(NVDA=todays_pr)
+
+#             if diff > 0:
+#                 # Trading logic
+#                 if sma_5 > sma_35:
+#                     # order_target orders as many shares as needed to
+#                     # achieve the desired number of shares.
+#                     order(symbol("NVDA"), 2)
+#                 elif sma_5 < sma_35:
+#                     order(symbol("NVDA"), -2)
+
+#         perf = zipline.run_algorithm(start=datetime(2016, 2, 24, 0, 0, 0, 0, pytz.utc),
+#                                      end=datetime(2017, 12, 29, 0,
+#                                                   0, 0, 0, pytz.utc),
+#                                      initialize=initialize,
+#                                      capital_base=100,
+#                                      handle_data=handle_data,
+#                                      data=panel)
+#         perf.plots = [go.Scatter(x=perf.index, y=perf.sma_35, mode='lines', name="sma_35"),
+#                       go.Scatter(x=perf.index, y=perf.sma_5,
+#                                  mode='lines', name="sma_5")
+#                       ]
+
+#         # print(perf)
+#         # trace_line = go.Scatter(x=list(df.date),
+#         #                         y=list(df.close),
+#         #                         # visible=False,
+#         #                         name="Close",
+#         #                         showlegend=False)
+#         # updatemenus = list([
+#         #     dict(
+#         #         buttons=list([
+#         #             dict(
+#         #                 args=[{'visible': [True, False, False]}],
+#         #                 label='Line',
+#         #                 method='update'
+#         #             ),
+#         #             dict(
+#         #                 args=[{'visible': [False, True, False]}],
+#         #                 label='Candle',
+#         #                 method='update'
+#         #             ),
+#         #             dict(
+#         #                 args=[{'visible': [False, False, True]}],
+#         #                 label='Bar',
+#         #                 method='update'
+#         #             ),
+#         #         ]),
+#         #         direction='down',
+#         #         pad={'r': 10, 't': 10},
+#         #         showactive=True,
+#         #         x=0,
+#         #         xanchor='left',
+#         #         y=1.05,
+#         #         yanchor='top'
+#         #     ),
+#         # ])
+
+#         layout = dict(
+#             title="hello",
+#             # updatemenus=updatemenus,
+#             autosize=False,
+#             xaxis=dict(
+#                 rangeselector=dict(
+#                     buttons=list([
+#                         dict(count=1,
+#                              label='1m',
+#                              step='month',
+#                              stepmode='backward'),
+#                         dict(count=6,
+#                              label='6m',
+#                              step='month',
+#                              stepmode='backward'),
+#                         dict(count=1,
+#                              label='YTD',
+#                              step='year',
+#                              stepmode='todate'),
+#                         dict(count=1,
+#                              label='1y',
+#                              step='year',
+#                              stepmode='backward'),
+#                         dict(step='all')
+#                     ])
+#                 ),
+#                 rangeslider=dict(
+#                     visible=True
+#                 ),
+#                 type='date'
+#             )
+#         )
+
+#         trace_line = go.Figure(layout=layout)
+#         trace_line.add_scatter(x=perf.index, y=perf.NVDA,
+#                                mode='lines', name="NVDA")
+#         for i in perf.plots:
+#             trace_line.add_trace(i)
+
+#         # return dcc.Graph(
+#         #     id="graph_close",
+#         #     figure=go.Figure(trace_line)
+#         # )
+
+#         trace_candle = go.Figure(layout=layout)
+#         trace_candle.add_trace(go.Candlestick(x=df.date,
+#                                               open=df.open,
+#                                               high=df.high,
+#                                               low=df.low,
+#                                               close=df.close,
+#                                               # increasing=dict(line=dict(color="#00ff00")),
+#                                               # decreasing=dict(line=dict(color="white")),
+#                                               visible=True,
+#                                               showlegend=False)
+#                                )
+#         for i in perf.plots:
+#             trace_candle.add_trace(i)
+
+#         # return trace_candle
+
+#         trace_bar = go.Figure(layout=layout)
+#         trace_bar .add_trace(go.Ohlc(x=df.date,
+#                                      open=df.open,
+#                                      high=df.high,
+#                                      low=df.low,
+#                                      close=df.close,
+#                                      # increasing=dict(line=dict(color="#888888")),
+#                                      # decreasing=dict(line=dict(color="#888888")),
+#                                      visible=False,
+#                                      showlegend=False))
+#         for i in perf.plots:
+#             trace_bar.add_trace(i)
+
+#         data = [trace_line, trace_candle, trace_bar]
+
+#         return dcc.Graph(
+#             id="graph_close",
+#             figure=trace_line
+#         )
+
+
 @app.callback(
     Output('tab2-lyt', 'children'),
-    # Button: switch to Tab 2
-    [Input("tabs", "active_tab")],
+    [Input("linecandle-dropdown", "value")],
     [State("intermediate-value", "children")]
 )
-def update_fig(n_clicks, input_value):
-    if n_clicks is not None:
-        #parsed = json.loads(input_value)
-        # df=pd.read_csv(input_value)
-        print(input_value)
-        print(type(input_value))
-        df = pd.read_json(input_value, orient='records')
-        #df=pd.DataFrame(json.loads(str(df)))
-        #print(df)
-        panel = get_from_pdr_to_panel() #nvidia
-        
+def update_fig2(nval, input_value):
+    print(input_value)
+    print(type(input_value))
+    df = pd.read_json(input_value, orient='records')
+    # df=pd.DataFrame(json.loads(str(df)))
+    # print(df)
+    panel = get_from_pdr_to_panel()  # nvidia
 
-        def initialize(context):
-            pass
+    def initialize(context):
+        pass
 
+    def handle_data(context, data):
+        todays_pr = data.current(symbol('NVDA'), 'price')
+        diff = context.portfolio.cash - todays_pr
 
-        def handle_data(context, data):
-            todays_pr= data.current(symbol('NVDA'),'price')
-            diff= context.portfolio.cash - todays_pr 
+        hist = data.history(symbol('NVDA'), 'price', 35, '1d')
+        sma_35 = hist.mean()
+        sma_5 = hist[-5:].mean()
+        # print(hist)
+        record(sma_35=sma_35)
+        record(sma_5=sma_5)
+        record(NVDA=todays_pr)
 
-            hist = data.history(symbol('NVDA'),'price', 35, '1d')
-            sma_35= hist.mean()
-            sma_5= hist[-5:].mean()
-            #print(hist)
-            record(sma_35=sma_35)
-            record(sma_5=sma_5)
-            record(NVDA=todays_pr)
+        if diff > 0:
+            # Trading logic
+            if sma_5 > sma_35:
+                # order_target orders as many shares as needed to
+                # achieve the desired number of shares.
+                order(symbol("NVDA"), 2)
+            elif sma_5 < sma_35:
+                order(symbol("NVDA"), -2)
 
-            if diff>0:
-                # Trading logic
-                if sma_5 > sma_35:
-                    # order_target orders as many shares as needed to
-                    # achieve the desired number of shares.
-                    order(symbol("NVDA"), 2)
-                elif sma_5 < sma_35:
-                    order(symbol("NVDA"), -2)
-                    
-            
-        perf = zipline.run_algorithm(start=datetime(2016, 2, 24, 0, 0, 0, 0, pytz.utc),
-                            end=datetime(2017, 12, 29, 0, 0, 0, 0, pytz.utc),
-                            initialize=initialize,
-                            capital_base=100,
-                            handle_data=handle_data,
-                            data=panel)
-        perf.plots=[go.Scatter(x=perf.index, y=perf.sma_35,mode='lines', name="sma_35"),
-                    go.Scatter(x=perf.index, y=perf.sma_5,mode='lines', name="sma_5")
-        ]
+    perf = zipline.run_algorithm(start=datetime(2016, 2, 24, 0, 0, 0, 0, pytz.utc),
+                                 end=datetime(2017, 12, 29, 0,
+                                              0, 0, 0, pytz.utc),
+                                 initialize=initialize,
+                                 capital_base=100,
+                                 handle_data=handle_data,
+                                 data=panel)
+    perf.plots = [go.Scatter(x=perf.index, y=perf.sma_35, mode='lines', name="sma_35"),
+                  go.Scatter(x=perf.index, y=perf.sma_5,
+                             mode='lines', name="sma_5")
+                  ]
 
-        # print(perf)
-        # trace_line = go.Scatter(x=list(df.date),
-        #                         y=list(df.close),
-        #                         # visible=False,
-        #                         name="Close",
-        #                         showlegend=False)
-
-        trace_line= go.Figure()
-        trace_line.add_scatter(x=perf.index, y=perf.NVDA,mode='lines', name="NVDA")
-        for i in perf.plots:
-            trace_line.add_trace(i)
-        return trace_line
-
-        trace_candle= go.Figure()
-        trace_candle.add_trace(go.Candlestick(x=df.date,
-                                      open=df.open,
-                                      high=df.high,
-                                      low=df.low,
-                                      close=df.close,
-                                      # increasing=dict(line=dict(color="#00ff00")),
-                                      # decreasing=dict(line=dict(color="white")),
-                                      visible=True,
-                                      showlegend=False)
-        )
-        for i in perf.plots:
-            trace_candle.add_trace(i)
-
-        # return trace_candle
-
-        trace_bar = go.Figure()
-        trace_bar .add_trace(go.Ohlc(x=df.date,
-                            open=df.open,
-                            high=df.high,
-                            low=df.low,
-                            close=df.close,
-                            # increasing=dict(line=dict(color="#888888")),
-                            # decreasing=dict(line=dict(color="#888888")),
-                            visible=False,
-                            showlegend=False))
-        for i in perf.plots:
-            trace_bar.add_trace(i)
-
-        data = [trace_line, trace_candle, trace_bar]
-
-        updatemenus = list([
-            dict(
+    layout = dict(
+        title="hello",
+        # updatemenus=updatemenus,
+        autosize=False,
+        width=2000,
+        height=500,
+        xaxis=dict(
+            rangeselector=dict(
                 buttons=list([
-                    dict(
-                        args=[{'visible': [True, False, False]}],
-                        label='Line',
-                        method='update'
-                    ),
-                    dict(
-                        args=[{'visible': [False, True, False]}],
-                        label='Candle',
-                        method='update'
-                    ),
-                    dict(
-                        args=[{'visible': [False, False, True]}],
-                        label='Bar',
-                        method='update'
-                    ),
-                ]),
-                direction='down',
-                pad={'r': 10, 't': 10},
-                showactive=True,
-                x=0,
-                xanchor='left',
-                y=1.05,
-                yanchor='top'
+                    dict(count=1,
+                         label='1m',
+                         step='month',
+                         stepmode='backward'),
+                    dict(count=6,
+                         label='6m',
+                         step='month',
+                         stepmode='backward'),
+                    dict(count=1,
+                         label='YTD',
+                         step='year',
+                         stepmode='todate'),
+                    dict(count=1,
+                         label='1y',
+                         step='year',
+                         stepmode='backward'),
+                    dict(step='all')
+                ])
             ),
-        ])
-
-        layout = dict(
-            title="hello",
-            updatemenus=updatemenus,
-            autosize=False,
-            xaxis=dict(
-                rangeselector=dict(
-                    buttons=list([
-                        dict(count=1,
-                             label='1m',
-                             step='month',
-                             stepmode='backward'),
-                        dict(count=6,
-                             label='6m',
-                             step='month',
-                             stepmode='backward'),
-                        dict(count=1,
-                             label='YTD',
-                             step='year',
-                             stepmode='todate'),
-                        dict(count=1,
-                             label='1y',
-                             step='year',
-                             stepmode='backward'),
-                        dict(step='all')
-                    ])
-                ),
-                rangeslider=dict(
-                    visible=True
-                ),
-                type='date'
-            )
+            rangeslider=dict(
+                visible=True
+            ),
+            type='date'
         )
+    )
 
-        return {
-            "data": data,
-            "layout": layout
-        }
+    trace_line = go.Figure(layout=layout)
+    trace_line.add_scatter(x=perf.index, y=perf.NVDA,
+                           mode='lines', name="NVDA")
+    for i in perf.plots:
+        trace_line.add_trace(i)
+
+    # return dcc.Graph(
+    #     id="graph_close",
+    #     figure=go.Figure(trace_line)
+    # )
+
+    trace_candle = go.Figure(layout=layout)
+    trace_candle.add_trace(go.Candlestick(x=df.date,
+                                          open=df.open,
+                                          high=df.high,
+                                          low=df.low,
+                                          close=df.close,
+                                          # increasing=dict(line=dict(color="#00ff00")),
+                                          # decreasing=dict(line=dict(color="white")),
+                                          visible=True,
+                                          showlegend=False)
+                           )
+    for i in perf.plots:
+        trace_candle.add_trace(i)
+
+    # return trace_candle
+
+    trace_bar = go.Figure(layout=layout)
+    trace_bar .add_trace(go.Ohlc(x=df.date,
+                                 open=df.open,
+                                 high=df.high,
+                                 low=df.low,
+                                 close=df.close,
+                                 # increasing=dict(line=dict(color="#888888")),
+                                 # decreasing=dict(line=dict(color="#888888")),
+                                 visible=False,
+                                 showlegend=False))
+    for i in perf.plots:
+        trace_bar.add_trace(i)
+
+    data = [trace_line, trace_candle, trace_bar]
+    if nval == '001':
+        ffig = data[0]
+    elif nval == '010':
+        ffig = data[1]
+    elif nval == '100':
+        ffig = data[2]
+
+    print("nval "+str(nval))
+
+    return html.Div(id='tab2-lyt',
+                    children=[
+                        dcc.Dropdown(
+                            id='demo-dropdown',
+                            options=[
+                                {'label': 'MA crossover', 'value': 'MA'},
+                                {'label': 'Montreal', 'value': 'MTL'},
+                                {'label': 'San Francisco', 'value': 'SF'}
+                            ],
+                            value='SF'
+                        ),
+                        dcc.Dropdown(
+                            id='linecandle-dropdown',
+                            options=[
+                                {'label': 'Line',
+                                 'value':  '001'},
+                                {'label': 'Candle', 'value': '010'},
+                                {'label': 'ohc',
+                                 'value': '100'}
+                            ],
+                            value=nval
+                        ),
+                        html.Div(id='dd-output-container'),
+
+
+
+                        dcc.Graph(
+                            id="graph_close",
+                            figure=ffig
+                        )
+                    ],
+                    className="six columns")
 
 
 pre_style = {
     'whiteSpace': 'pre-wrap',
     'wordBreak': 'break-all',
     'whiteSpace': 'normal'
+
+
 }
 
 
 # @app.callback(Output('output-data-upload', 'children'),
-@app.callback(Output('intermediate-value', 'children'),
-              [Input('upload-data', 'contents')])
+@ app.callback(Output('intermediate-value', 'children'),
+               [Input('upload-data', 'contents')])
 def update_output(contents):
     if contents is not None:
         # print(contents)
@@ -269,14 +444,14 @@ def update_output(contents):
         content_string = base64.b64decode(content_string).decode('utf-8')
         # print(content_string)
         if 'csv' in content_type:
-            #df = pd.read_csv(io.StringIO(content_string))
-            cleaned_df = pd.read_csv(io.StringIO(content_string))            
+            # df = pd.read_csv(io.StringIO(content_string))
+            cleaned_df = pd.read_csv(io.StringIO(content_string))
             return cleaned_df.to_json(date_format='iso', orient='records')
             # return "content_string"
     return
 
 
-@app.callback(
+@ app.callback(
     dash.dependencies.Output('dd-output-container', 'children'),
     [dash.dependencies.Input('demo-dropdown', 'value')])
 def update_output_dd(value):
