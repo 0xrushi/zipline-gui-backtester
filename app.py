@@ -16,6 +16,7 @@ import base64
 import io
 import pandas as pd
 
+
 from tabs.tab1 import tab_1_layout
 from tabs.tab2 import tab_2_layout
 from strategies.macrossover import TradingAlgo as maalgo
@@ -36,16 +37,22 @@ from datetime import datetime
 import pytz
 import json
 
+
 UPLOAD_DIRECTORY = "uploads"
 if not os.path.exists(UPLOAD_DIRECTORY):
     os.makedirs(UPLOAD_DIRECTORY)
+
+# external JavaScript files
+external_scripts = [
+]
 
 
 start = datetime.today() - relativedelta(years=5)
 end = datetime.today()
 
 
-app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
+app = dash.Dash(__name__, external_scripts=external_scripts,
+                external_stylesheets=[dbc.themes.DARKLY])
 app.config['suppress_callback_exceptions'] = False
 
 app.layout = html.Div([
@@ -83,11 +90,12 @@ def tab_resources(click):
 
 
 @app.callback(
-    Output('graph_close', 'figure'),
-    [Input("linecandle-dropdown", "value"), Input('demo-dropdown', 'value')],
+    [Output('graph_close', 'figure'), Output(
+        'figdiv', 'style'), Output('perf-table', 'children')],
+    [Input('demo-dropdown', 'value')],
     [State("intermediate-value", "children")]
 )
-def update_fig2(nval, strategy_name, input_value):
+def update_fig2(strategy_name, input_value):
     print(type(input_value))
     print(strategy_name)
 
@@ -127,8 +135,11 @@ def update_fig2(nval, strategy_name, input_value):
         title="hello",
         updatemenus=updatemenus,
         autosize=False,
-        width=2000,
+        width=1800,
         height=500,
+        font_color='white',
+        title_font_color="white",
+        legend_title_font_color="white",
         xaxis=dict(
             rangeselector=dict(
                 buttons=list([
@@ -190,8 +201,22 @@ def update_fig2(nval, strategy_name, input_value):
     fig['data'].append(dict(x=perf.index, y=perf.close,
                             name="Moving Average2", visible=False))
     fig['layout'] = layout
+    fig["layout"].update(paper_bgcolor="#21252C",
+                         plot_bgcolor="#21252C", font_color='white')
 
-    return fig
+    table_header = [
+        html.Thead(html.Tr([html.Th(i) for i in perf.columns]))
+    ]
+
+    rows = []
+    for index, row in perf.iterrows():
+        rows.append(html.Tr([html.Td(row[i])
+                             for i in perf.columns]))
+
+    table_body = [html.Tbody(rows)]
+    perft = dbc.Table(table_header + table_body, bordered=True)
+
+    return fig, {'display': 'block'}, perft
 
 
 pre_style = {

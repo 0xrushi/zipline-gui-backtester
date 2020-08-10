@@ -1,8 +1,15 @@
+:root {
+    --main-dark: #1b1b1b;
+    --main-mediumdark: #444;
+    --main-purple: rgb(156, 66, 247);
+  }
+
 .banner {
     height: 75px;
     margin: 0px -10px 10px;
-    background-color: rgb(66, 196, 247);
+    background-color: var(--main-purple);
     border-radius: 2px;
+    opacity: 0.9;
 }
 
 .banner h2{
@@ -13,27 +20,112 @@
 }
 
 .banner Img{
-    position: relative;
+    position: relative; 
     float: right;
     right: 10px;
     height: 75px;
 }
 
-#example-form{
-    width: 40%;
+/* #example-form button{
+    display: inline-flex;
+    height: 100%;
+    border: none;   
+    cursor: default;
+    text-align: center;
+    vertical-align: middle;
+} */
+
+.card-class-dark{
+    max-width: 30%;
+    /* height: 500px; */
+    margin-top: 10%;
     margin-right: auto;
     margin-left: auto;
-    text-align: center;
-    /* background: red; */
+    text-align: left;
+    background: var(--main-dark);
+    border-radius: 5px;
+}
+
+/* 
+#example-form div div:first-child{  
+    background-color: azure;
+    border-radius: 4px;
+    border: 3px solid #dbdbdb;
+} */
+
+.datepickker-input .col-8{
+    background-color: azure;
+    border-radius: 4px;
+    border: 3px solid #dbdbdb;
+}
+
+.DateRangePickerInput__withBorder {
+    border-radius: 0px;
+    border: 0px solid #dbdbdb;
+}
+
+#example-form .col-8{
+    background-color: azure;
+    border-radius: 4px;
+    border: 3px solid #dbdbdb;
+}
+
+.form-control {
+    display: block;
+    width: 100%;
+    height: calc(1.5em + 0.75rem + 2px);
+    padding: 0.375rem 0.75rem;
+    font-size: 0.9375rem;
+    font-weight: 400;
+    line-height: 1.5;
+    color: var(--main-mediumdark);
+    background-color: azure;
+    background-clip: padding-box;
+    border: 0px;
+    -webkit-transition: border-color 0.15s ease-in-out, -webkit-box-shadow 0.15s ease-in-out;
+    transition: border-color 0.15s ease-in-out, -webkit-box-shadow 0.15s ease-in-out;
+    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out, -webkit-box-shadow 0.15s ease-in-out;
 }
 
 
-#example-form button{
-    display: inline-flex;
-    height: 100%;
-    border: none;
-    padding: 14px 28px;
-    font-size: 16px;
-    cursor: pointer;
-    text-align: center;
+#tab1_btn_submit{
+    width: 200px;
+    margin: 0 auto;
+    display: block;
+    background: var(--main-purple);
+}
+
+#example-form{
+    vertical-align: middle; 
+}
+
+
+.VirtualizedSelectOption {
+    background: var(--main-dark);
+  }
+  
+.VirtualizedSelectFocusedOption {
+    background-color: var(--main-mediumdark);
+}
+
+div.has-value.Select--single>.Select-control .Select-value .Select-value-label, .has-value.is-pseudo-focused.Select--single>.Select-control .Select-value .Select-value-label {
+    color: white;
+}
+div.Select.has-value.Select--single > .Select-control .Select-value .Select-value-label, .Select.has-value.is-pseudo-focused.Select--single > .Select-control .Select-value .Select-value-label {
+    color: white;
+}
+
+div.Select-value{
+    background-color: var(--main-dark);
+    color: white;
+}
+
+#dropdown-menu {
+    height: auto;
+    width: 200px;
+}
+
+#figdiv{
+    padding: 20px;
 }
